@@ -1,6 +1,11 @@
-export default function StudentInfo({ formData, setFormData, errors }) {
-  const handleChange = (e) =>
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+import { useFormContext } from "react-hook-form";
+
+
+export default function StudentInfo() {
+  const {
+    register,
+    formState: { errors },
+  } = useFormContext();
 
   const inputStyle = `
     w-full p-3 rounded-lg
@@ -12,17 +17,27 @@ export default function StudentInfo({ formData, setFormData, errors }) {
     transition
   `;
 
+  const errorStyle = "text-red-500 text-sm mt-1";
+  const step1Fields = [
+  "firstName",
+  "lastName",
+  "email",
+  "phone",
+  "birthDate",
+  "gradeLevel",
+  "school",
+  "learningGoals",
+  "subjects",
+];
+
   return (
     <div
       className="
-        w-full p-8 rounded-2xl
-
         bg-white/90 dark:bg-slate-900/80
         backdrop-blur-xl
-
+        p-8 rounded-2xl
         border border-slate-200 dark:border-slate-800
         shadow-lg dark:shadow-black/30
-
         transition
       "
     >
@@ -32,78 +47,120 @@ export default function StudentInfo({ formData, setFormData, errors }) {
 
       {/* Name */}
       <div className="grid md:grid-cols-2 gap-5">
-        <input
-          name="firstName"
-          value={formData.firstName}
-          onChange={handleChange}
-          className={inputStyle}
-          placeholder="First Name"
-        />
-        <input
-          name="lastName"
-          value={formData.lastName}
-          onChange={handleChange}
-          className={inputStyle}
-          placeholder="Last Name"
-        />
+        <div>
+          <input
+            {...register("firstName")}
+            className={inputStyle}
+            placeholder="First Name"
+          />
+          {errors.firstName && (
+            <p className={errorStyle}>{errors.firstName.message}</p>
+          )}
+        </div>
+
+        <div>
+          <input
+            {...register("lastName")}
+            className={inputStyle}
+            placeholder="Last Name"
+          />
+          {errors.lastName && (
+            <p className={errorStyle}>{errors.lastName.message}</p>
+          )}
+        </div>
       </div>
 
       {/* Contact */}
-      <div className="grid md:grid-cols-2 gap-5 mt-4">
-        <input
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          className={inputStyle}
-          placeholder="Email Address"
-        />
-        <input
-          name="phone"
-          value={formData.phone}
-          onChange={handleChange}
-          className={inputStyle}
-          placeholder="Phone Number"
-        />
+      <div className="grid md:grid-cols-2 gap-5 mt-5">
+        <div>
+          <input
+            {...register("email")}
+            className={inputStyle}
+            placeholder="Email Address"
+          />
+          {errors.email && (
+            <p className={errorStyle}>{errors.email.message}</p>
+          )}
+        </div>
+
+        <div>
+          <input
+            {...register("phone")}
+            className={inputStyle}
+            placeholder="Phone Number"
+          />
+          {errors.phone && (
+            <p className={errorStyle}>{errors.phone.message}</p>
+          )}
+        </div>
       </div>
 
       {/* DOB + Grade */}
-      <div className="grid md:grid-cols-2 gap-5 mt-4">
-        <input
-          type="date"
-          name="birthDate"
-          value={formData.birthDate}
-          onChange={handleChange}
-          className={inputStyle}
-        />
-        <select
-          name="gradeLevel"
-          value={formData.gradeLevel}
-          onChange={handleChange}
-          className={inputStyle}
-        >
-          <option value="">Select Grade Level</option>
-          <option>High School</option>
-          <option>College</option>
-        </select>
+      <div className="grid md:grid-cols-2 gap-5 mt-5">
+        <div>
+          <input
+            type="date"
+            {...register("birthDate")}
+            className={inputStyle}
+          />
+          {errors.birthDate && (
+            <p className={errorStyle}>{errors.birthDate.message}</p>
+          )}
+        </div>
+
+        <div>
+          <select
+            {...register("gradeLevel")}
+            className={inputStyle}
+          >
+            <option value="">Select Grade Level</option>
+            <option>High School</option>
+            <option>College</option>
+          </select>
+          {errors.gradeLevel && (
+            <p className={errorStyle}>{errors.gradeLevel.message}</p>
+          )}
+        </div>
       </div>
 
-      {/* Goals */}
-      <textarea
-        name="learningGoals"
-        value={formData.learningGoals}
-        onChange={handleChange}
-        className={`${inputStyle} mt-4`}
-        placeholder="Learning Goals"
-      />
+      {/* School */}
+      <div className="mt-5">
+        <input
+          {...register("school")}
+          className={inputStyle}
+          placeholder="School Name"
+        />
+        {errors.school && (
+          <p className={errorStyle}>{errors.school.message}</p>
+        )}
+      </div>
+
+      {/* Learning Goals */}
+      <div className="mt-5">
+        <textarea
+          {...register("learningGoals")}
+          className={`${inputStyle} min-h-[100px]`}
+          placeholder="Learning Goals"
+        />
+        {errors.learningGoals && (
+          <p className={errorStyle}>
+            {errors.learningGoals.message}
+          </p>
+        )}
+      </div>
 
       {/* Subjects */}
-      <textarea
-        name="subjects"
-        value={formData.subjects}
-        onChange={handleChange}
-        className={`${inputStyle} mt-4`}
-        placeholder="Subjects Needing Help"
-      />
+      <div className="mt-5">
+        <textarea
+          {...register("subjects")}
+          className={`${inputStyle} min-h-[100px]`}
+          placeholder="Subjects Needing Help"
+        />
+        {errors.subjects && (
+          <p className={errorStyle}>{errors.subjects.message}</p>
+        )}
+      </div>
+      
     </div>
   );
 }

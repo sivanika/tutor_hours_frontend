@@ -1,25 +1,38 @@
 export default function StepProgress({ currentStep }) {
-  const steps = ["Student", "Parent", "School", "Availability", "Subscription"];
+  const steps = [
+    "Student",
+    "Parent",
+    "School",
+    "Availability",
+    "Preview",
+    "Subscription",
+  ];
+
+  const progressPercent =
+    ((currentStep - 1) / (steps.length - 1)) * 100;
 
   return (
     <div className="w-full mb-10">
       <div className="flex items-center justify-between relative">
-        {/* Progress Line */}
+        {/* Background Line */}
         <div className="absolute top-5 left-0 w-full h-1 bg-slate-200 dark:bg-slate-800 rounded" />
 
+        {/* Active Progress Line */}
         <div
           className="absolute top-5 left-0 h-1 bg-slate-900 dark:bg-slate-100 rounded transition-all duration-500"
-          style={{
-            width: `${((currentStep - 1) / (steps.length - 1)) * 100}%`,
-          }}
+          style={{ width: `${progressPercent}%` }}
         />
 
-        {/* Steps */}
-        {steps.map((s, i) => {
-          const isActive = currentStep >= i + 1;
+        {/* Step Circles */}
+        {steps.map((label, index) => {
+          const stepNumber = index + 1;
+          const isActive = currentStep >= stepNumber;
 
           return (
-            <div key={s} className="relative z-10 flex flex-col items-center flex-1">
+            <div
+              key={label}
+              className="relative z-10 flex flex-col items-center flex-1"
+            >
               {/* Circle */}
               <div
                 className={`
@@ -34,7 +47,7 @@ export default function StepProgress({ currentStep }) {
                   }
                 `}
               >
-                {i + 1}
+                {stepNumber}
               </div>
 
               {/* Label */}
@@ -48,7 +61,7 @@ export default function StepProgress({ currentStep }) {
                   }
                 `}
               >
-                {s}
+                {label}
               </span>
             </div>
           );

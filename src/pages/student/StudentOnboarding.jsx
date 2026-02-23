@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { useForm, FormProvider } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { studentSchema } from "./validation/studentSchema";
 import API from "../../services/api";
 import { useNavigate } from "react-router-dom";
 
@@ -13,211 +15,159 @@ import Subscription from "./components/Subscription";
 import AdminUpload from "./components/AdminUpload";
 
 export default function StudentOnboarding() {
-    const [currentStep, setCurrentStep] = useState(1);
-    const [submitted, setSubmitted] = useState(false);
+  const [step, setStep] = useState(1);
+  const [submitted, setSubmitted] = useState(false);
+  const navigate = useNavigate();
 
-    const navigate = useNavigate();
+  const methods = useForm({
+    resolver: zodResolver(studentSchema),
+    mode: "onBlur",
+    defaultValues: {
+      availability: [],
+      subscriptionTier: "basic",
+      parentConsent: false,
+      schoolVerification: false,
+    },
+  });
 
-    const [formData, setFormData] = useState({
-        firstName: "",
-        lastName: "",
-        email: "",
-        phone: "",
-        birthDate: "",
-        gradeLevel: "",
-        school: "",
-        learningGoals: "",
-        subjects: "",
-        parentName: "",
-        parentRelationship: "",
-        parentEmail: "",
-        parentPhone: "",
-        parentConsent: false,
-        schoolEmail: "",
-        studentId: "",
-        schoolVerification: false,
-        availability: [],
-        subscriptionTier: "basic",
-        professorPreferences: "",
-        studentPhoto: null,
-        studentDocument: null,
-    });
+  /* ---------- STEP VALIDATION MAP ---------- */
+  const stepFields = {
+    1: [
+      "firstName",
+      "lastName",
+      "email",
+      "phone",
+      "birthDate",
+      "gradeLevel",
+      "school",
+      "learningGoals",
+      "subjects",
+    ],
+    2: [
+      "parentName",
+      "parentRelationship",
+      "parentEmail",
+      "parentPhone",
+      "parentConsent",
+    ],
+    3: [],
+    4: ["availability"],
+    5: [],
+    6: [],
+  };
 
-    const [errors, setErrors] = useState({});
+  const next = async () => {
+    const fieldsToValidate = stepFields[step] || [];
+    const valid = await methods.trigger(fieldsToValidate);
 
-    const validate = () => {
-        let err = {};
+    if (valid) {
+      setStep((s) => s + 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
 
-        if (currentStep === 1) {
-            if (!formData.firstName) err.firstName = "Required";
-            if (!formData.lastName) err.lastName = "Required";
-            if (!formData.email) err.email = "Required";
-            if (!formData.birthDate) err.birthDate = "Required";
-            if (!formData.gradeLevel) err.gradeLevel = "Required";
-            if (!formData.school) err.school = "Required";
-            if (!formData.learningGoals) err.learningGoals = "Required";
-            if (!formData.subjects) err.subjects = "Required";
+  const prev = () => {
+    setStep((s) => s - 1);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const submitProfile = async (data) => {
+    try {
+      const form = new FormData();
+
+      Object.keys(data).forEach((key) => {
+        if (key === "availability") {
+          form.append("availability", JSON.stringify(data.availability));
+        } else if (
+          key !== "studentPhoto" &&
+          key !== "studentDocument"
+        ) {
+          form.append(key, data[key]);
         }
+      });
 
-        if (currentStep === 2) {
-            if (!formData.parentName) err.parentName = "Required";
-            if (!formData.parentRelationship) err.parentRelationship = "Required";
-            if (!formData.parentEmail) err.parentEmail = "Required";
-            if (!formData.parentPhone) err.parentPhone = "Required";
-            if (!formData.parentConsent) err.parentConsent = "Consent required";
-        }
-
-        if (currentStep === 4) {
-            if (formData.availability.length === 0)
-                err.availability = "Select at least one slot";
-        }
-
-        setErrors(err);
-        return Object.keys(err).length === 0;
-    };
-
-const submitProfile = async () => {
-  if (!validate()) return alert("Fix errors");
-
-  try {
-    const form = new FormData();
-
-    Object.keys(formData).forEach((key) => {
-      if (key === "availability") {
-        form.append("availability", JSON.stringify(formData.availability));
-      } else if (key !== "studentPhoto" && key !== "studentDocument") {
-        form.append(key, formData[key]);
+      if (data.studentPhoto) {
+        form.append("studentPhoto", data.studentPhoto);
       }
-    });
 
-    if (formData.studentPhoto) {
-      form.append("studentPhoto", formData.studentPhoto);
-    }
+      if (data.studentDocument) {
+        form.append("studentDocument", data.studentDocument);
+      }
 
-    if (formData.studentDocument) {
-      form.append("studentDocument", formData.studentDocument);
-    }
-
-    const { data } = await API.put("/student/complete-profile", form, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
-
-    // 🔥🔥🔥 THIS IS THE FIX 🔥🔥🔥
-    const stored = JSON.parse(localStorage.getItem("userInfo"));
-
-    localStorage.setItem(
-      "userInfo",
-      JSON.stringify({
-        ...stored,
-        user: {
-          ...stored.user,
-          profileCompleted: true, // ✅ FORCE UPDATE
+      /* ✅ CORRECT BACKEND ROUTE */
+      await API.put("/student/complete-profile", form, {
+        headers: {
+          "Content-Type": "multipart/form-data",
         },
-      })
-    );
+      });
 
-    alert(data.message || "Profile completed successfully");
+      setSubmitted(true);
 
-    navigate("/student/dashboard");
-  } catch (err) {
-    console.error(err);
-    alert(err.response?.data?.message || "Student profile submit failed");
-  }
-};
+      setTimeout(() => {
+        navigate("/student/dashboard");
+      }, 1200);
 
-    const motionProps = {
-        initial: { opacity: 0, x: 50 },
-        animate: { opacity: 1, x: 0 },
-        exit: { opacity: 0, x: -50 },
-    };
+    } catch (err) {
+      console.error("Student submit error:", err);
+      alert(
+        err.response?.data?.message ||
+        "Student profile submit failed"
+      );
+    }
+  };
 
-    return (
-        <div className="min-h-screen bg-gradient-to-br from-[#f5f7fb] to-[#eef1ff]">
-            <div className="max-w-6xl mx-auto p-6">
-                <div className="card">
-                    <VerificationStatus submitted={submitted} />
-                    <StepProgress currentStep={currentStep} />
+  return (
+    <FormProvider {...methods}>
+      <div className="min-h-screen bg-gradient-to-br from-[#f5f7fb] to-[#eef1ff]">
+        <div className="max-w-5xl mx-auto p-6">
 
-                    <AnimatePresence mode="wait">
-                        {currentStep === 1 && (
-                            <motion.div key="s1" {...motionProps}>
-                                <StudentInfo
-                                    formData={formData}
-                                    setFormData={setFormData}
-                                    errors={errors}
-                                />
-                            </motion.div>
-                        )}
+          <VerificationStatus submitted={submitted} />
+          <StepProgress currentStep={step} />
 
-                        {currentStep === 2 && (
-                            <motion.div key="s2" {...motionProps}>
-                                <ParentInfo
-                                    formData={formData}
-                                    setFormData={setFormData}
-                                    errors={errors}
-                                />
-                            </motion.div>
-                        )}
+          <form
+            onSubmit={methods.handleSubmit(submitProfile)}
+            className="mt-6"
+          >
+            {step === 1 && <StudentInfo />}
+            {step === 2 && <ParentInfo />}
+            {step === 3 && <SchoolInfo />}
+            {step === 4 && <Availability />}
+            {step === 5 && <AdminUpload />}
+            {step === 6 && <Subscription />}
+            
 
-                        {currentStep === 3 && (
-                            <motion.div key="s3" {...motionProps}>
-                                <SchoolInfo formData={formData} setFormData={setFormData} />
-                                {/* 🔥 THIS WAS YOUR BUG */}
-                                <AdminUpload
-                                    formData={formData}
-                                    setFormData={setFormData}
-                                />
-                            </motion.div>
-                        )}
+            <div className="flex justify-between mt-10">
+              {step > 1 && (
+                <button
+                  type="button"
+                  onClick={prev}
+                  className="px-6 py-2 rounded-lg bg-slate-200"
+                >
+                  Back
+                </button>
+              )}
 
-                        {currentStep === 4 && (
-                            <motion.div key="s4" {...motionProps}>
-                                <Availability
-                                    formData={formData}
-                                    setFormData={setFormData}
-                                    errors={errors}
-                                />
-                            </motion.div>
-                        )}
-
-                        {currentStep === 5 && (
-                            <motion.div key="s5" {...motionProps}>
-                                <Subscription
-                                    formData={formData}
-                                    setFormData={setFormData}
-                                />
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-
-                    <div className="flex justify-between mt-8">
-                        {currentStep > 1 && (
-                            <button
-                                className="btn btn-outline"
-                                onClick={() => setCurrentStep((s) => s - 1)}
-                            >
-                                Back
-                            </button>
-                        )}
-
-                        {currentStep < 5 ? (
-                            <button
-                                className="btn btn-primary ml-auto"
-                                onClick={() => setCurrentStep((s) => s + 1)}
-                            >
-                                Next
-                            </button>
-                        ) : (
-                            <button
-                                className="btn btn-primary ml-auto"
-                                onClick={submitProfile}
-                            >
-                                Submit for Verification
-                            </button>
-                        )}
-                    </div>
-                </div>
+              {step < 6 ? (
+                <button
+                  type="button"
+                  onClick={next}
+                  className="ml-auto px-6 py-2 rounded-lg bg-slate-900 text-white"
+                >
+                  Next
+                </button>
+              ) : (
+                <button
+                  type="submit"
+                  className="ml-auto px-6 py-2 rounded-lg bg-slate-900 text-white"
+                >
+                  Submit for Verification
+                </button>
+              )}
             </div>
+          </form>
+
         </div>
-    );
+      </div>
+    </FormProvider>
+  );
 }

@@ -4,65 +4,71 @@ export default function NoticeBoard() {
       title: "System Maintenance",
       text: "Platform will be unavailable Sunday 2AM – 6AM.",
       urgent: true,
+      icon: "⚠️",
     },
     {
       title: "New Feature: Group Sessions",
-      text: "Now students can learn together with discounts.",
+      text: "Now students can learn together with exclusive discounts.",
+      icon: "🚀",
     },
     {
       title: "Tutor of the Month",
-      text: "Congrats Dr. Sarah Johnson 🎉",
+      text: "Congratulations Dr. Sarah Johnson! 🎉",
+      icon: "🏆",
     },
   ];
 
   return (
-    <section className="max-w-7xl mx-auto px-6 mt-20 transition-colors duration-500">
-      <div
-        className="
-          rounded-2xl p-8
+    <section className="max-w-7xl mx-auto px-6 py-16 transition-colors duration-500">
+      <div className="
+        rounded-3xl p-8 md:p-10
+        bg-[#f5f3ff] dark:bg-[#160d2e]
+        border border-[#6A11CB]/12 dark:border-[#6A11CB]/25
+        shadow-lg dark:shadow-[#6A11CB]/10
+      ">
+        {/* Header row */}
+        <div className="flex items-center gap-3 mb-8">
+          <div className="w-10 h-10 rounded-xl grad-bg flex items-center justify-center text-white text-xl shadow-lg shadow-[#6A11CB]/30">
+            📢
+          </div>
+          <h2 className="text-xl font-bold text-[#1a0e33] dark:text-white tracking-tight">
+            Announcements
+          </h2>
+          <span className="ml-auto text-xs text-[#6A11CB] dark:text-[#a78bfa] bg-[#6A11CB]/10 px-3 py-1 rounded-full font-medium">
+            Latest
+          </span>
+        </div>
 
-          bg-white
-          dark:bg-slate-900/90
-
-          border border-slate-200 dark:border-slate-800
-          shadow-md dark:shadow-black/30
-
-          text-slate-800 dark:text-slate-200
-        "
-      >
-        {/* Heading */}
-        <h2 className="text-xl font-semibold mb-6 tracking-wide text-slate-900 dark:text-white">
-          📢 Announcements
-        </h2>
-
-        {/* Notices */}
-        <div className="grid md:grid-cols-3 gap-6">
+        {/* Cards */}
+        <div className="grid md:grid-cols-3 gap-5">
           {notices.map((n, i) => (
             <div
               key={i}
               className={`
-                p-5 rounded-xl border transition-all duration-300
-
-                ${
-                  n.urgent
-                    ? "bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white"
-                    : "bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
+                group relative p-5 rounded-2xl border overflow-hidden
+                transition-all duration-300 hover:-translate-y-1
+                ${n.urgent
+                  ? "bg-[#FF4E9B]/08 border-[#FF4E9B]/25 dark:bg-[#FF4E9B]/05 dark:border-[#FF4E9B]/20"
+                  : "bg-white dark:bg-[#0f0720] border-[#6A11CB]/10 dark:border-[#6A11CB]/20"
                 }
-
-                hover:-translate-y-1 hover:shadow-lg
+                hover:shadow-xl hover:shadow-[#6A11CB]/10
               `}
             >
-              <h3 className="font-semibold mb-2">
+              {/* Glow on urgent */}
+              {n.urgent && (
+                <div className="absolute top-0 right-0 w-24 h-24 bg-[#FF4E9B]/10 rounded-full blur-2xl pointer-events-none" />
+              )}
+
+              <div className="text-2xl mb-3">{n.icon}</div>
+              <h3 className={`font-bold mb-1.5 text-sm ${n.urgent ? "text-[#FF4E9B]" : "text-[#1a0e33] dark:text-white"}`}>
                 {n.title}
               </h3>
-
-              <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+              <p className="text-xs leading-relaxed text-[#6b7280] dark:text-[#a78bfa]">
                 {n.text}
               </p>
-
               {n.urgent && (
-                <span className="text-xs mt-3 inline-block font-medium text-slate-500 dark:text-slate-400">
-                  • Priority
+                <span className="inline-block mt-3 text-[10px] font-bold uppercase tracking-widest text-[#FF4E9B] bg-[#FF4E9B]/10 px-2 py-0.5 rounded-full">
+                  Priority
                 </span>
               )}
             </div>

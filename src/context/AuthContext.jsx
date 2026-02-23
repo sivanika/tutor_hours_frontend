@@ -9,54 +9,64 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
 
+  // ── HELPER: UPDATE STATE & STORAGE ──
+  const updateAuth = (userData, token) => {
+    localStorage.setItem("userInfo", JSON.stringify({ user: userData, token }))
+    localStorage.setItem("token", token) // Backup for direct API calls if needed
+    setUser(userData)
+  }
+
   // 🔥 LOAD USER ON REFRESH
   useEffect(() => {
     const storedUserInfo = JSON.parse(localStorage.getItem("userInfo"))
 
-    // Check if we have valid user info with token
-    if (storedUserInfo && storedUserInfo.user && storedUserInfo.token) {
+    if (storedUserInfo?.user && storedUserInfo?.token) {
       setUser(storedUserInfo.user)
 
-      // 🔁 AUTO REDIRECT ON REFRESH
-      // Only redirect if we are at root
+      // 🔁 AUTO REDIRECT ON REFRESH (only if at root)
       if (window.location.pathname === "/") {
-        if (storedUserInfo.user.role === "admin") {
+        const { role, profileCompleted, isVerified } = storedUserInfo.user
+
+        if (role === "admin") {
           navigate("/admin/dashboard", { replace: true })
-        } else if (storedUserInfo.user.role === "professor") {
-          navigate("/professor/dashboard", { replace: true })
-        } else {
-          navigate("/student/dashboard", { replace: true })
+        } else if (role === "professor") {
+          if (!profileCompleted) navigate("/professor/onboarding", { replace: true })
+          else if (!isVerified) navigate("/verification-pending", { replace: true })
+          else navigate("/professor/dashboard", { replace: true })
+        } else if (role === "student") {
+          if (!profileCompleted) navigate("/student/onboarding", { replace: true })
+          else navigate("/student/dashboard", { replace: true })
         }
       }
     }
-
     setLoading(false)
   }, [])
 
-  // LOGIN
+  // ── LOGIN ──
   const login = async (email, password) => {
     const res = await API.post("/auth/login", { email, password })
-
     const { user: userData, token } = res.data
-
-    localStorage.setItem("userInfo", JSON.stringify({ user: userData, token }))
-
-    // Also set token separately if other parts of app expect it (just in case)
-    localStorage.setItem("token", token)
-
-    setUser(userData)
+    updateAuth(userData, token)
     return userData
   }
 
-  // LOGOUT
+  // ── REGISTER ──
+  const register = async (name, email, password, role) => {
+    const res = await API.post("/auth/register", { name, email, password, role })
+    const { user: userData, token } = res.data
+    updateAuth(userData, token)
+    return userData
+  }
+
+  // ── LOGOUT ──
   const logout = () => {
-    localStorage.clear() // This clears everything, which is safe.
+    localStorage.clear()
     setUser(null)
     navigate("/", { replace: true })
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, register, logout, setUser }}>
       {!loading && children}
     </AuthContext.Provider>
   )

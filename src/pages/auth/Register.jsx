@@ -7,10 +7,7 @@ export default function Register() {
     <div
       className="
         min-h-screen flex items-center justify-center p-6
-
-        bg-slate-100
-        dark:bg-gradient-to-br dark:from-slate-900 dark:via-slate-950 dark:to-black
-
+        bg-gradient-to-br from-[#6A11CB] via-[#4B34C9] to-[#2575FC]
         transition-colors duration-500
       "
     >
@@ -18,20 +15,18 @@ export default function Register() {
       <div
         className="
           w-full max-w-md p-10 rounded-2xl text-center
-
-          bg-white/90 dark:bg-slate-900/80
+          bg-white/95
           backdrop-blur-2xl
-
-          border border-slate-200 dark:border-slate-800
-          shadow-xl dark:shadow-black/40
-
+          border border-white/50
+          shadow-2xl shadow-black/20
           animate-[popup_.5s_ease]
         "
       >
         {/* Title */}
-        <h2 className="text-3xl font-bold mb-8 text-slate-800 dark:text-slate-100">
+        <h2 className="text-3xl font-bold mb-2 text-gray-800">
           Register As
         </h2>
+        <p className="text-sm text-gray-500 mb-8">Choose your role to get started</p>
 
         {/* Options */}
         <div className="flex flex-col gap-5">
@@ -41,16 +36,11 @@ export default function Register() {
             onClick={() => navigate("/register/student")}
             className="
               group flex items-center justify-center gap-3
-              py-4 rounded-xl font-medium
-
-              bg-slate-900 text-white
-              hover:bg-black
-
-              dark:bg-slate-100 dark:text-black
-              dark:hover:bg-white
-
-              shadow-md hover:shadow-xl
-              hover:-translate-y-1
+              py-4 rounded-xl font-semibold
+              bg-gradient-to-r from-[#6A11CB] to-[#2575FC]
+              text-white
+              shadow-lg shadow-[#6A11CB]/25
+              hover:shadow-xl hover:-translate-y-1
               transition-all duration-300
             "
           >
@@ -63,16 +53,10 @@ export default function Register() {
             onClick={() => navigate("/register/professor")}
             className="
               group flex items-center justify-center gap-3
-              py-4 rounded-xl font-medium
-
-              bg-slate-800 text-white
-              hover:bg-slate-900
-
-              dark:bg-slate-200 dark:text-black
-              dark:hover:bg-white
-
-              shadow-md hover:shadow-xl
-              hover:-translate-y-1
+              py-4 rounded-xl font-semibold
+              bg-[#FF4E9B] text-white
+              shadow-lg shadow-[#FF4E9B]/25
+              hover:shadow-xl hover:-translate-y-1
               transition-all duration-300
             "
           >
@@ -82,11 +66,11 @@ export default function Register() {
         </div>
 
         {/* Back to login */}
-        <p className="mt-8 text-sm text-slate-600 dark:text-slate-400">
+        <p className="mt-8 text-sm text-gray-500">
           Already have an account?{" "}
           <span
             onClick={() => navigate("/login")}
-            className="cursor-pointer font-medium hover:underline"
+            className="cursor-pointer font-medium text-[#6A11CB] hover:underline"
           >
             Login
           </span>

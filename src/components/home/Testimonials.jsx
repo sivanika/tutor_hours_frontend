@@ -1,112 +1,101 @@
 import { useEffect, useState } from "react";
 
-export default function Testimonials() {
-  const testimonials = [
-    {
-      name: "Jessica Lin",
-      role: "Engineering Student",
-      text: "ProfessorOn helped me clear my exams with top grades. The professors are extremely knowledgeable and supportive.",
-    },
-    {
-      name: "Dr. Robert Hayes",
-      role: "Economics Professor",
-      text: "This platform connects me with serious learners. Teaching online has never been this smooth and professional.",
-    },
-    {
-      name: "Michael Torres",
-      role: "Computer Science Student",
-      text: "The virtual sessions, recordings, and analytics are amazing. It feels like a premium university experience.",
-    },
-    {
-      name: "Sarah Ahmed",
-      role: "Medical Student",
-      text: "Flexible scheduling and verified tutors saved me so much time. Highly recommended!",
-    },
-  ];
+const testimonials = [
+  {
+    name: "Jessica Lin",
+    role: "Engineering Student",
+    text: "TutorHours helped me clear my exams with top grades. The professors are extremely knowledgeable and supportive.",
+    color: "#6A11CB",
+  },
+  {
+    name: "Dr. Robert Hayes",
+    role: "Economics Professor",
+    text: "This platform connects me with serious learners. Teaching online has never been this smooth and professional.",
+    color: "#FF4E9B",
+  },
+  {
+    name: "Michael Torres",
+    role: "Computer Science Student",
+    text: "The virtual sessions, recordings, and analytics are amazing. It feels like a premium university experience.",
+    color: "#2575FC",
+  },
+  {
+    name: "Sarah Ahmed",
+    role: "Medical Student",
+    text: "Flexible scheduling and verified tutors saved me so much time. Highly recommended for any serious learner.",
+    color: "#6A11CB",
+  },
+];
 
+export default function Testimonials() {
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setIndex((prev) => (prev + 1) % testimonials.length);
-    }, 3000);
-
-    return () => clearInterval(timer);
+    const t = setInterval(() => setIndex((p) => (p + 1) % testimonials.length), 4000);
+    return () => clearInterval(t);
   }, []);
+
+  const cur = testimonials[index];
 
   return (
     <section
       id="testimonials"
-      className="
-        py-24
-        bg-slate-50
-        dark:bg-gradient-to-b dark:from-slate-900 dark:to-black
-        transition-colors duration-500
-      "
+      className="relative py-28 grad-bg overflow-hidden transition-colors duration-500"
     >
-      {/* Heading */}
-      <div className="text-center mb-14 px-6">
-        <h2 className="text-4xl font-extrabold text-slate-800 dark:text-slate-100">
-          What Our Users Say
-        </h2>
+      {/* Orbs */}
+      <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-[#FF4E9B]/20 blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-20 -left-20 w-72 h-72 rounded-full bg-white/10 blur-3xl pointer-events-none" />
 
-        <p className="mt-3 text-slate-600 dark:text-slate-400">
-          Real experiences from students and professors
-        </p>
-      </div>
+      {/* Grid texture */}
+      <div className="absolute inset-0 opacity-[0.05]"
+        style={{ backgroundImage: "linear-gradient(rgba(255,255,255,.4) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.4) 1px,transparent 1px)", backgroundSize: "48px 48px" }}
+      />
 
-      {/* Slider */}
-      <div className="max-w-4xl mx-auto px-6 relative overflow-hidden">
+      <div className="relative z-10 max-w-4xl mx-auto px-6">
+
+        {/* Heading */}
+        <div className="text-center mb-14">
+          <p className="text-sm font-semibold uppercase tracking-widest text-[#FF4E9B] mb-3">
+            Testimonials
+          </p>
+          <h2 className="text-4xl md:text-5xl font-black text-white">
+            What Our Users Say
+          </h2>
+          <p className="mt-3 text-white/60">
+            Real experiences from students and professors worldwide
+          </p>
+        </div>
+
+        {/* Slide */}
         <div
-          className="flex transition-transform duration-700 ease-in-out"
-          style={{ transform: `translateX(-${index * 100}%)` }}
+          key={index}
+          className="animate-fadeIn glass rounded-3xl p-10 md:p-14 text-center shadow-2xl"
         >
-          {testimonials.map((t, i) => (
-            <div key={i} className="min-w-full px-4">
-              <div
-                className="
-                  rounded-2xl p-10 text-center
+          {/* Avatar */}
+          <div
+            className="w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center font-black text-3xl text-white shadow-xl"
+            style={{
+              background: `linear-gradient(135deg, ${cur.color}, #2575FC)`,
+              boxShadow: `0 12px 32px ${cur.color}50`,
+            }}
+          >
+            {cur.name.charAt(0)}
+          </div>
 
-                  bg-white
-                  dark:bg-slate-900/80
+          {/* Stars */}
+          <div className="flex justify-center gap-1 mb-5">
+            {[...Array(5)].map((_, i) => (
+              <span key={i} className="text-[#FF4E9B] text-xl">★</span>
+            ))}
+          </div>
 
-                  border border-slate-200 dark:border-slate-800
-                  shadow-md dark:shadow-black/30
+          {/* Quote */}
+          <p className="text-white/80 text-lg md:text-xl italic leading-relaxed mb-8 max-w-2xl mx-auto">
+            "{cur.text}"
+          </p>
 
-                  backdrop-blur-xl
-                  transition-all duration-300
-                "
-              >
-                {/* Avatar */}
-                <div
-                  className="
-                    w-16 h-16 mx-auto mb-5
-                    rounded-full
-                    bg-slate-200 dark:bg-slate-800
-                    text-slate-800 dark:text-white
-                    flex items-center justify-center
-                    font-semibold text-xl
-                  "
-                >
-                  {t.name.charAt(0)}
-                </div>
-
-                {/* Text */}
-                <p className="text-slate-600 dark:text-slate-400 italic mb-6 leading-relaxed">
-                  “{t.text}”
-                </p>
-
-                {/* Name */}
-                <h4 className="font-semibold text-lg text-slate-800 dark:text-slate-100">
-                  {t.name}
-                </h4>
-
-                <span className="text-sm text-slate-500 dark:text-slate-500">
-                  {t.role}
-                </span>
-              </div>
-            </div>
-          ))}
+          <h4 className="font-bold text-lg text-white">{cur.name}</h4>
+          <span className="text-sm text-white/50">{cur.role}</span>
         </div>
 
         {/* Dots */}
@@ -115,14 +104,10 @@ export default function Testimonials() {
             <button
               key={i}
               onClick={() => setIndex(i)}
-              className={`
-                w-3 h-3 rounded-full transition
-                ${
-                  index === i
-                    ? "bg-slate-800 dark:bg-white scale-125"
-                    : "bg-slate-300 dark:bg-slate-700"
-                }
-              `}
+              className={`rounded-full transition-all duration-300 ${index === i
+                  ? "w-8 h-3 bg-[#FF4E9B] shadow-lg shadow-[#FF4E9B]/50"
+                  : "w-3 h-3 bg-white/30 hover:bg-white/60"
+                }`}
             />
           ))}
         </div>

@@ -23,7 +23,7 @@ export default function ProfessorApproval() {
 
   const approveProfessor = async (id) => {
     try {
-      await API.put(`/admin/verify-professor/${id}`);
+      await API.put(`/admin/approve-professor/${id}`);
       alert("Professor approved successfully");
       fetchPending();
     } catch (err) {

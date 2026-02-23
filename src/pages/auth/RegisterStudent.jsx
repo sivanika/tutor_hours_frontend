@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import API from "../../services/api";
+import { useAuth } from "../../context/AuthContext";
 
 export default function RegisterStudent() {
+  const { register } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -11,13 +12,7 @@ export default function RegisterStudent() {
   const submit = async (e) => {
     e.preventDefault();
     try {
-      const { data } = await API.post("/auth/register", {
-        email,
-        password,
-        role: "student",
-      });
-
-      localStorage.setItem("userInfo", JSON.stringify(data));
+      await register("", email, password, "student");
       navigate("/student/onboarding");
     } catch (err) {
       alert(err.response?.data?.message || "Registration failed");
@@ -28,31 +23,25 @@ export default function RegisterStudent() {
     <div
       className="
         min-h-screen flex items-center justify-center p-6
-
-        bg-slate-100
-        dark:bg-gradient-to-br dark:from-slate-900 dark:via-slate-950 dark:to-black
-
-        transition-colors duration-500
+        bg-gradient-to-br from-[#6A11CB] via-[#4B34C9] to-[#2575FC]
       "
     >
       <form
         onSubmit={submit}
         className="
           w-full max-w-md p-8 rounded-2xl space-y-5
-
-          bg-white/90 dark:bg-slate-900/80
+          bg-white/95
           backdrop-blur-2xl
-
-          border border-slate-200 dark:border-slate-800
-          shadow-xl dark:shadow-black/40
-
+          border border-white/50
+          shadow-2xl shadow-black/20
           animate-[popup_.5s_ease]
         "
       >
         {/* Title */}
-        <h2 className="text-2xl font-bold text-center text-slate-800 dark:text-slate-100">
+        <h2 className="text-2xl font-bold text-center text-gray-800">
           Student Registration
         </h2>
+        <p className="text-center text-sm text-gray-500 -mt-3">Create your student account</p>
 
         {/* Email */}
         <input
@@ -60,10 +49,10 @@ export default function RegisterStudent() {
           placeholder="Email address"
           className="
             w-full p-3 rounded-lg
-            bg-slate-50 dark:bg-slate-800
-            border border-slate-300 dark:border-slate-700
-            text-slate-800 dark:text-slate-100
-            focus:outline-none focus:ring-2 focus:ring-slate-500
+            bg-gray-50
+            border border-gray-200
+            text-gray-800
+            focus:outline-none focus:ring-2 focus:ring-[#6A11CB]/40
             transition
           "
           value={email}
@@ -78,10 +67,10 @@ export default function RegisterStudent() {
             placeholder="Password"
             className="
               w-full p-3 rounded-lg pr-12
-              bg-slate-50 dark:bg-slate-800
-              border border-slate-300 dark:border-slate-700
-              text-slate-800 dark:text-slate-100
-              focus:outline-none focus:ring-2 focus:ring-slate-500
+              bg-gray-50
+              border border-gray-200
+              text-gray-800
+              focus:outline-none focus:ring-2 focus:ring-[#6A11CB]/40
               transition
             "
             value={password}
@@ -92,11 +81,7 @@ export default function RegisterStudent() {
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="
-              absolute right-3 top-3
-              text-slate-500 hover:text-slate-800
-              dark:hover:text-white
-            "
+            className="absolute right-3 top-3 text-gray-400 hover:text-gray-700"
           >
             {showPassword ? "🙈" : "👁️"}
           </button>
@@ -106,13 +91,9 @@ export default function RegisterStudent() {
         <button
           className="
             w-full py-3 rounded-lg font-semibold
-
-            bg-slate-900 text-white
-            hover:bg-black
-
-            dark:bg-slate-100 dark:text-black
-            dark:hover:bg-white
-
+            bg-gradient-to-r from-[#6A11CB] to-[#2575FC]
+            text-white
+            hover:shadow-lg hover:shadow-[#6A11CB]/30
             transition-all duration-200
             active:scale-95
           "
@@ -121,10 +102,10 @@ export default function RegisterStudent() {
         </button>
 
         {/* Divider */}
-        <div className="flex items-center gap-3 text-slate-400 text-sm">
-          <div className="flex-1 h-px bg-slate-300 dark:bg-slate-700" />
+        <div className="flex items-center gap-3 text-gray-400 text-sm">
+          <div className="flex-1 h-px bg-gray-200" />
           OR
-          <div className="flex-1 h-px bg-slate-300 dark:bg-slate-700" />
+          <div className="flex-1 h-px bg-gray-200" />
         </div>
 
         {/* Google Button (UI only) */}
@@ -132,15 +113,9 @@ export default function RegisterStudent() {
           type="button"
           className="
             w-full py-3 rounded-lg font-medium
-
-            bg-white text-slate-800
-            border border-slate-300
-            hover:bg-slate-100
-
-            dark:bg-slate-800 dark:text-white
-            dark:border-slate-700
-            dark:hover:bg-slate-700
-
+            bg-white text-gray-700
+            border border-gray-200
+            hover:bg-gray-50
             transition
           "
         >

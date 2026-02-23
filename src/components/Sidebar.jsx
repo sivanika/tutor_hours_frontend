@@ -21,7 +21,7 @@ function Sidebar({ role }) {
             >
               Sessions
             </Link>
-            <Link to="/chat">Chat</Link>
+
 
           </>
         )}

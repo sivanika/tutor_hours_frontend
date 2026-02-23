@@ -5,112 +5,99 @@ import {
   FaLinkedinIn,
 } from "react-icons/fa";
 
+const footerLinks = {
+  Platform: ["Find Tutors", "Become a Tutor", "Pricing", "Dashboard"],
+  Resources: ["Blog", "Help Center", "Guides", "Community"],
+  Company: ["About Us", "Careers", "Privacy Policy", "Terms"],
+};
+
 export default function Footer() {
   return (
-    <footer
-      className="
-        relative
-        bg-gradient-to-br
-        from-indigo-50 to-purple-100
-        dark:from-slate-900 dark:to-slate-950
-        border-t border-gray-200 dark:border-slate-800
-        pt-16 pb-8 mt-20
-      "
-    >
-      <div className="max-w-7xl mx-auto px-6">
-        {/* GRID */}
-        <div className="grid md:grid-cols-4 gap-12">
-          {/* BRAND */}
-          <div>
-            <h2 className="text-2xl font-bold text-indigo-600 mb-4">
-              ProfessorOn
-            </h2>
+    <footer className="
+      relative
+      bg-[#0f0720] dark:bg-[#0a0418]
+      border-t border-[#6A11CB]/20
+      pt-16 pb-8 mt-0 overflow-hidden
+    ">
+      {/* Background glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-80 rounded-full bg-[#6A11CB]/08 blur-3xl pointer-events-none" />
 
-            <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
+        <div className="grid md:grid-cols-5 gap-12 mb-12">
+
+          {/* Brand */}
+          <div className="md:col-span-2">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-9 h-9 rounded-xl grad-bg flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-[#6A11CB]/30">
+                T
+              </div>
+              <span className="text-xl font-extrabold">
+                <span className="grad-text">Tutor</span>
+                <span className="text-white">Hours</span>
+              </span>
+            </div>
+
+            <p className="text-[#a78bfa] text-sm leading-relaxed max-w-xs">
               Connecting students with verified professors through modern
-              virtual classrooms and flexible learning experiences.
+              virtual classrooms and personalized learning experiences.
             </p>
 
-            {/* Social */}
-            <div className="flex gap-4 mt-6">
-              {[FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn].map(
-                (Icon, i) => (
-                  <div
-                    key={i}
-                    className="
-                      w-9 h-9 rounded-full
-                      flex items-center justify-center
-                      bg-white dark:bg-slate-800
-                      shadow hover:scale-110 transition
-                      cursor-pointer
-                    "
-                  >
-                    <Icon className="text-indigo-600 dark:text-indigo-400 text-sm" />
-                  </div>
-                )
-              )}
+            {/* Socials */}
+            <div className="flex gap-3 mt-6">
+              {[FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn].map((Icon, i) => (
+                <button
+                  key={i}
+                  className="
+                    w-9 h-9 rounded-xl
+                    flex items-center justify-center
+                    bg-[#6A11CB]/20 border border-[#6A11CB]/30
+                    text-[#a78bfa]
+                    hover:bg-[#6A11CB] hover:text-white hover:border-[#6A11CB]
+                    hover:scale-110 hover:shadow-lg hover:shadow-[#6A11CB]/30
+                    transition-all duration-200
+                  "
+                >
+                  <Icon className="text-sm" />
+                </button>
+              ))}
             </div>
           </div>
 
-          {/* LINKS */}
-          <div>
-            <h3 className="font-semibold mb-4 text-gray-900 dark:text-white">
-              Platform
-            </h3>
-            <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-              <li className="hover:text-indigo-600 cursor-pointer">
-                Find Tutors
-              </li>
-              <li className="hover:text-indigo-600 cursor-pointer">
-                Become Tutor
-              </li>
-              <li className="hover:text-indigo-600 cursor-pointer">
-                Pricing
-              </li>
-              <li className="hover:text-indigo-600 cursor-pointer">
-                Dashboard
-              </li>
-            </ul>
-          </div>
-
-          {/* RESOURCES */}
-          <div>
-            <h3 className="font-semibold mb-4 text-gray-900 dark:text-white">
-              Resources
-            </h3>
-            <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-              <li className="hover:text-indigo-600 cursor-pointer">Blog</li>
-              <li className="hover:text-indigo-600 cursor-pointer">Help Center</li>
-              <li className="hover:text-indigo-600 cursor-pointer">Guides</li>
-              <li className="hover:text-indigo-600 cursor-pointer">
-                Community
-              </li>
-            </ul>
-          </div>
-
-          {/* CONTACT */}
-          <div>
-            <h3 className="font-semibold mb-4 text-gray-900 dark:text-white">
-              Contact
-            </h3>
-            <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-              <li>📧 support@professoron.com</li>
-              <li>📞 +91 98765 43210</li>
-              <li>📍 Chennai, India</li>
-            </ul>
-          </div>
+          {/* Link columns */}
+          {Object.entries(footerLinks).map(([title, links]) => (
+            <div key={title}>
+              <h3 className="font-semibold mb-5 text-white text-sm uppercase tracking-wider">
+                {title}
+              </h3>
+              <ul className="space-y-3">
+                {links.map((link) => (
+                  <li key={link}>
+                    <a
+                      href="#"
+                      className="text-sm text-[#a78bfa] hover:text-[#FF4E9B] transition-colors duration-200"
+                    >
+                      {link}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
 
-        {/* BOTTOM BAR */}
-        <div
-          className="
-            border-t border-gray-200 dark:border-slate-800
-            mt-12 pt-6
-            text-center text-sm
-            text-gray-500 dark:text-gray-400
-          "
-        >
-          © {new Date().getFullYear()} ProfessorOn. All rights reserved.
+        {/* Bottom bar */}
+        <div className="border-t border-[#6A11CB]/20 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-sm text-[#a78bfa]/60">
+            © {new Date().getFullYear()} TutorHours. All rights reserved.
+          </p>
+          <div className="flex items-center gap-2 text-sm text-[#a78bfa]/60">
+            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+            All systems operational
+          </div>
+          <div className="flex gap-2">
+            <span className="text-xs px-3 py-1 rounded-full border border-[#6A11CB]/30 text-[#a78bfa]">Privacy</span>
+            <span className="text-xs px-3 py-1 rounded-full border border-[#6A11CB]/30 text-[#a78bfa]">Terms</span>
+          </div>
         </div>
       </div>
     </footer>

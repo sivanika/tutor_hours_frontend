@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react"
 import API from "../../../services/api"
 import socket from "../../../services/socket"
+import { useAuth } from "../../../context/AuthContext"
+import {
+  FiSearch, FiClock, FiBook, FiCheckCircle,
+} from "react-icons/fi"
 
 export default function TutorsTab() {
   const [sessions, setSessions] = useState([])
@@ -10,6 +14,7 @@ export default function TutorsTab() {
     level: "",
     time: "",
   })
+  const { user } = useAuth()
 
   const fetchSessions = async () => {
     try {
@@ -35,19 +40,27 @@ export default function TutorsTab() {
     }
   }, [])
 
-const handleEnroll = async (id) => {
-  try {
-    const res = await API.post(`/sessions/${id}/enroll`)
-    alert(res.data.message || "Enrolled successfully 🎉")
+  const handleEnroll = async (id) => {
+    try {
+      const res = await API.post(`/sessions/${id}/enroll`)
+      alert(res.data.message || "Enrolled successfully 🎉")
 
-    // 🔴 real time update trigger (socket)
-    socket.emit("dashboard:update")
+      // real time update trigger (socket)
+      socket.emit("dashboard:update")
 
-  } catch (err) {
-    console.error(err)
-    alert("Enrollment failed")
+    } catch (err) {
+      console.error(err)
+      alert("Enrollment failed")
+    }
   }
-}
+
+  // Check if current user is enrolled in a session
+  const isEnrolled = (session) => {
+    return session.students?.some(
+      (s) => (s.student?._id || s.student) === user?._id ||
+        (s.student?._id || s.student)?.toString() === user?._id
+    )
+  }
 
   const filtered = sessions.filter(s => {
     if (filters.subject && !s.title.toLowerCase().includes(filters.subject.toLowerCase())) return false
@@ -60,14 +73,15 @@ const handleEnroll = async (id) => {
     <div className="animate-fadeIn">
 
       {/* FILTERS */}
-      <div className="bg-white rounded-2xl shadow-md p-6 mb-6 hover:shadow-xl">
-        <h3 className="text-lg font-bold text-[#2A4D6E] mb-4">
-          🔍 Search Filters
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+        <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <FiSearch className="text-[#6A11CB]" />
+          Search Filters
         </h3>
 
         <div className="grid md:grid-cols-3 gap-4 mb-4">
           <select
-            className="border p-2 rounded"
+            className="border border-gray-200 p-2.5 rounded-xl text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-[#6A11CB]/40 focus:outline-none transition"
             value={filters.subject}
             onChange={e => setFilters({ ...filters, subject: e.target.value })}
           >
@@ -79,7 +93,7 @@ const handleEnroll = async (id) => {
           </select>
 
           <select
-            className="border p-2 rounded"
+            className="border border-gray-200 p-2.5 rounded-xl text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-[#6A11CB]/40 focus:outline-none transition"
             value={filters.level}
             onChange={e => setFilters({ ...filters, level: e.target.value })}
           >
@@ -90,7 +104,7 @@ const handleEnroll = async (id) => {
           </select>
 
           <select
-            className="border p-2 rounded"
+            className="border border-gray-200 p-2.5 rounded-xl text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-[#6A11CB]/40 focus:outline-none transition"
             value={filters.time}
             onChange={e => setFilters({ ...filters, time: e.target.value })}
           >
@@ -103,73 +117,89 @@ const handleEnroll = async (id) => {
 
       {/* LOADING */}
       {loading && (
-        <div className="text-center py-12">
-          <i className="fas fa-spinner fa-spin text-4xl text-[#2A4D6E]"></i>
-          <p className="mt-2 text-gray-500">Loading tutors...</p>
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin w-10 h-10 rounded-full border-4 border-[#6A11CB] border-t-transparent" />
         </div>
       )}
 
       {/* EMPTY STATE */}
       {!loading && filtered.length === 0 && (
-        <div className="text-center py-12 text-gray-500">
-          <i className="fas fa-user-times text-5xl mb-3"></i>
-          <p>No tutors found</p>
+        <div className="text-center py-16 text-gray-500">
+          <FiSearch size={48} className="mx-auto mb-3 opacity-40" />
+          <p className="text-lg font-semibold text-gray-600">No tutors found</p>
+          <p className="text-sm text-gray-400 mt-1">Try adjusting your filters</p>
         </div>
       )}
 
       {/* TUTOR CARDS */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filtered.map(s => (
-          <div
-            key={s._id}
-            className="bg-white rounded-2xl shadow-md p-6 border-l-4 border-[#4A8B6F]
-                       hover:shadow-2xl hover:scale-[1.02] transition-all duration-300"
-          >
-            {/* Header */}
-            <div className="flex items-center mb-4">
-              <div className="w-12 h-12 rounded-full bg-[#2A4D6E] text-white flex items-center justify-center mr-3">
-                <i className="fas fa-user-graduate"></i>
+        {filtered.map(s => {
+          const enrolled = isEnrolled(s)
+
+          return (
+            <div
+              key={s._id}
+              className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6
+                         hover:shadow-lg hover:scale-[1.02] transition-all duration-300"
+            >
+              {/* Header */}
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#6A11CB] to-[#2575FC] text-white flex items-center justify-center mr-3 font-bold text-sm shadow">
+                  {s.professor?.name?.[0]?.toUpperCase() || "P"}
+                </div>
+                <div>
+                  <h4 className="font-bold text-gray-800">
+                    {s.professor?.name}
+                  </h4>
+                  <p className="text-sm text-gray-400">
+                    {s.title} · {s.level}
+                  </p>
+                </div>
               </div>
-              <div>
-                <h4 className="font-bold text-[#2A4D6E]">
-                  {s.professor?.name}
-                </h4>
-                <p className="text-sm text-gray-500">
-                  {s.title} • {s.level}
+
+              {/* Details */}
+              <div className="text-sm text-gray-500 mb-3 space-y-1">
+                <p className="flex items-center gap-2">
+                  <FiBook size={14} className="text-[#6A11CB]" />
+                  {s.title}
+                </p>
+                <p className="flex items-center gap-2">
+                  <FiClock size={14} className="text-[#6A11CB]" />
+                  {s.date} {s.time}
                 </p>
               </div>
-            </div>
 
-            {/* Details */}
-            <div className="text-sm text-gray-600 mb-3">
-              <p>
-                <i className="fas fa-book mr-2 text-[#C76B4A]"></i>
-                {s.title}
-              </p>
-              <p>
-                <i className="fas fa-clock mr-2 text-[#C76B4A]"></i>
-                {s.date} {s.time}
-              </p>
-            </div>
+              {/* Slot */}
+              <div className="mb-4">
+                <span className="bg-green-50 text-green-600 px-2.5 py-1 rounded-full text-xs font-medium">
+                  {s.time}
+                </span>
+              </div>
 
-            {/* Slot */}
-            <div className="mb-4">
-              <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs">
-                {s.time}
-              </span>
+              {/* Button */}
+              {enrolled ? (
+                <button
+                  disabled
+                  className="w-full py-2.5 rounded-xl font-semibold text-sm bg-green-50 text-green-600 flex items-center justify-center gap-2 cursor-not-allowed"
+                >
+                  <FiCheckCircle size={14} />
+                  Already Enrolled
+                </button>
+              ) : (
+                <button
+                  onClick={() => handleEnroll(s._id)}
+                  className="w-full py-2.5 rounded-xl font-semibold text-sm text-white
+                             bg-gradient-to-r from-[#6A11CB] to-[#2575FC]
+                             hover:from-[#5A0EAD] hover:to-[#1D63D8]
+                             hover:shadow-lg hover:scale-105
+                             transition-all duration-300"
+                >
+                  Book Session
+                </button>
+              )}
             </div>
-
-            {/* Button */}
-            <button
-              onClick={() => handleEnroll(s._id)}
-              className="w-full bg-[#C76B4A] text-white py-2 rounded-full
-                         hover:bg-[#8A4F7D] hover:shadow-lg hover:scale-105
-                         transition-all duration-300"
-            >
-              Book Session
-            </button>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )

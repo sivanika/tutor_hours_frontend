@@ -4,71 +4,73 @@ import { useEffect, useState } from "react";
 export default function Header() {
   const navigate = useNavigate();
   const [dark, setDark] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  /* -----------------------------
-     Dark Mode Setup
-  ----------------------------- */
   useEffect(() => {
     const saved = localStorage.getItem("theme");
-
     if (saved === "dark") {
       document.documentElement.classList.add("dark");
       setDark(true);
     }
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   const toggleTheme = () => {
-    const newTheme = !dark;
-    setDark(newTheme);
-
-    if (newTheme) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
+    const next = !dark;
+    setDark(next);
+    document.documentElement.classList.toggle("dark", next);
+    localStorage.setItem("theme", next ? "dark" : "light");
   };
+
+  const navLinks = ["Features", "Pricing", "Testimonials"];
 
   return (
     <header
-      className="
+      className={`
         sticky top-0 z-50
-        backdrop-blur-2xl
-
-        bg-white/80
-        dark:bg-slate-950/80
-
-        border-b border-slate-200 dark:border-slate-800
-        shadow-md dark:shadow-black/30
-
-        transition-colors duration-500
-      "
+        transition-all duration-500
+        ${scrolled
+          ? "backdrop-blur-2xl bg-white/85 dark:bg-[#0f0720]/90 shadow-lg shadow-[#6A11CB]/10"
+          : "backdrop-blur-sm bg-white/60 dark:bg-transparent"
+        }
+        border-b border-[#6A11CB]/10 dark:border-[#6A11CB]/20
+      `}
     >
       <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
 
-        {/* ---------------- Logo ---------------- */}
-        <Link
-          to="/"
-          className="
-            text-2xl font-bold
-            text-slate-800 dark:text-slate-100
-            tracking-tight
-          "
-        >
-          🎓 ProfessorOn
+        {/* Logo */}
+        <Link to="/" className="flex items-center gap-2 group">
+          <span className="
+            w-9 h-9 rounded-xl grad-bg
+            flex items-center justify-center text-white font-bold text-lg
+            shadow-lg shadow-[#6A11CB]/30
+            group-hover:scale-110 transition-transform duration-300
+          ">
+            T
+          </span>
+          <span className="text-xl font-extrabold tracking-tight">
+            <span className="grad-text">Tutor</span>
+            <span className="text-slate-800 dark:text-white">Hours</span>
+          </span>
         </Link>
 
-        {/* ---------------- Nav Links ---------------- */}
-        <nav className="hidden md:flex space-x-8 font-medium">
-          {["Features", "Pricing", "Reviews", "About"].map((item) => (
+        {/* Desktop Nav */}
+        <nav className="hidden md:flex items-center gap-8">
+          {navLinks.map((item) => (
             <a
               key={item}
               href={`#${item.toLowerCase()}`}
               className="
-                text-slate-600 dark:text-slate-300
-                hover:text-black dark:hover:text-white
-                transition
+                text-sm font-medium text-slate-600 dark:text-slate-300
+                hover:text-[#6A11CB] dark:hover:text-[#FF4E9B]
+                transition-colors duration-200 relative
+                after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5
+                after:bg-[#6A11CB] dark:after:bg-[#FF4E9B]
+                after:transition-all after:duration-300
+                hover:after:w-full
               "
             >
               {item}
@@ -76,18 +78,20 @@ export default function Header() {
           ))}
         </nav>
 
-        {/* ---------------- Right Buttons ---------------- */}
-        <div className="flex items-center space-x-3">
+        {/* Right Side */}
+        <div className="flex items-center gap-3">
 
-          {/* Dark Mode Toggle */}
+          {/* Theme Toggle */}
           <button
             onClick={toggleTheme}
+            title="Toggle theme"
             className="
               w-10 h-10 rounded-xl
-              bg-slate-200 dark:bg-slate-800
-              text-slate-700 dark:text-slate-200
-              hover:scale-105
-              transition
+              bg-[#f5f3ff] dark:bg-[#6A11CB]/20
+              text-[#6A11CB] dark:text-[#a78bfa]
+              hover:scale-105 hover:shadow-md
+              transition-all duration-200
+              flex items-center justify-center text-lg
             "
           >
             {dark ? "🌙" : "☀️"}
@@ -97,33 +101,64 @@ export default function Header() {
           <button
             onClick={() => navigate("/login")}
             className="
-              px-5 py-2 rounded-xl
-              border border-slate-300 dark:border-slate-700
-              text-slate-700 dark:text-slate-200
-              hover:bg-slate-100 dark:hover:bg-slate-800
-              transition
+              hidden sm:block
+              px-5 py-2 rounded-xl text-sm font-semibold
+              border-2 border-[#6A11CB]/30 dark:border-[#6A11CB]/50
+              text-[#6A11CB] dark:text-[#a78bfa]
+              hover:border-[#6A11CB] hover:bg-[#6A11CB]/5
+              dark:hover:bg-[#6A11CB]/15
+              transition-all duration-200
             "
           >
             Login
           </button>
 
-          {/* Register */}
+          {/* Sign Up */}
           <button
             onClick={() => navigate("/register")}
             className="
-              px-5 py-2 rounded-xl
-              bg-slate-900 text-white
-              dark:bg-white dark:text-black
-              hover:opacity-90
-              shadow-md
-              transition
+              px-5 py-2 rounded-xl text-sm font-semibold text-white
+              grad-bg
+              shadow-lg shadow-[#6A11CB]/30
+              hover:shadow-xl hover:shadow-[#6A11CB]/40
+              hover:scale-105
+              transition-all duration-200
             "
           >
-            Sign Up
+            Sign Up Free
           </button>
 
+          {/* Mobile hamburger */}
+          <button
+            className="md:hidden w-10 h-10 flex flex-col items-center justify-center gap-1.5"
+            onClick={() => setMenuOpen(!menuOpen)}
+          >
+            <span className={`w-6 h-0.5 bg-[#6A11CB] transition-all ${menuOpen ? "rotate-45 translate-y-2" : ""}`} />
+            <span className={`w-6 h-0.5 bg-[#6A11CB] transition-all ${menuOpen ? "opacity-0" : ""}`} />
+            <span className={`w-6 h-0.5 bg-[#6A11CB] transition-all ${menuOpen ? "-rotate-45 -translate-y-2" : ""}`} />
+          </button>
         </div>
       </div>
+
+      {/* Mobile Menu */}
+      {menuOpen && (
+        <div className="md:hidden px-6 pb-5 pt-2 bg-white dark:bg-[#0f0720] border-t border-[#6A11CB]/10 animate-slideUp">
+          {navLinks.map((item) => (
+            <a
+              key={item}
+              href={`#${item.toLowerCase()}`}
+              onClick={() => setMenuOpen(false)}
+              className="block py-3 text-slate-700 dark:text-slate-300 hover:text-[#6A11CB] font-medium border-b border-[#6A11CB]/08 dark:border-[#6A11CB]/10"
+            >
+              {item}
+            </a>
+          ))}
+          <div className="flex gap-3 mt-4">
+            <button onClick={() => navigate("/login")} className="flex-1 py-2.5 rounded-xl border-2 border-[#6A11CB]/30 text-[#6A11CB] font-semibold text-sm">Login</button>
+            <button onClick={() => navigate("/register")} className="flex-1 py-2.5 rounded-xl grad-bg text-white font-semibold text-sm shadow-lg shadow-[#6A11CB]/30">Sign Up</button>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

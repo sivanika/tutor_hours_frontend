@@ -1,61 +1,120 @@
+import { useFormContext } from "react-hook-form";
+
 export default function SchoolInfo() {
+  const { register } = useFormContext();
+
+  const inputStyle = `
+    w-full p-3 rounded-lg
+    bg-slate-50 dark:bg-slate-800
+    border border-slate-300 dark:border-slate-700
+    text-slate-800 dark:text-slate-100
+    placeholder-slate-400
+    focus:outline-none focus:ring-2 focus:ring-slate-500
+    transition
+  `;
+
   return (
     <div
       className="
-        p-6 rounded-2xl
+        w-full p-8 rounded-2xl
 
         bg-white/90 dark:bg-slate-900/80
         backdrop-blur-xl
 
         border border-slate-200 dark:border-slate-800
-        shadow-md dark:shadow-black/30
+        shadow-lg dark:shadow-black/30
 
-        transition-colors duration-300
+        transition
       "
     >
-      <h2 className="text-slate-800 dark:text-slate-100 text-xl font-semibold mb-6 pb-3 border-b border-slate-200 dark:border-slate-800">
+      {/* Title */}
+      <h2 className="text-2xl font-bold mb-6 text-slate-800 dark:text-slate-100">
         School Verification
       </h2>
 
-      <div className="grid md:grid-cols-2 gap-5 mb-6">
+      {/* Inputs */}
+      <div className="grid md:grid-cols-2 gap-5">
         <input
-          className="
-            w-full p-3 rounded-lg
-            bg-slate-50 dark:bg-slate-800
-            border border-slate-300 dark:border-slate-700
-            text-slate-800 dark:text-slate-100
-            focus:outline-none focus:ring-2 focus:ring-slate-500
-            transition
-          "
+          {...register("schoolEmail")}
           placeholder="School Email Address"
+          className={inputStyle}
         />
 
         <input
-          className="
-            w-full p-3 rounded-lg
-            bg-slate-50 dark:bg-slate-800
-            border border-slate-300 dark:border-slate-700
-            text-slate-800 dark:text-slate-100
-            focus:outline-none focus:ring-2 focus:ring-slate-500
-            transition
-          "
+          {...register("studentId")}
           placeholder="Student ID Number"
+          className={inputStyle}
         />
       </div>
 
-      <label className="flex items-center gap-3 cursor-pointer text-slate-700 dark:text-slate-300">
+      {/* Checkbox */}
+      <label
+        className="
+          flex items-start gap-3 mt-6
+          p-4 rounded-lg
+
+          bg-slate-50 dark:bg-slate-800
+          border border-slate-200 dark:border-slate-700
+
+          cursor-pointer
+        "
+      >
         <input
           type="checkbox"
-          className="
-            w-4 h-4 rounded
-            accent-slate-800
-            dark:accent-slate-200
-          "
+          {...register("schoolVerification")}
+          className="mt-1 accent-slate-900 dark:accent-slate-100"
         />
-        <span className="text-sm">
-          I authorize school verification
+        <span className="text-sm text-slate-700 dark:text-slate-300">
+          I authorize school verification for account approval.
         </span>
       </label>
+
+      {/* File Upload Section */}
+      <div className="grid md:grid-cols-2 gap-5 mt-6">
+        <label
+          className="
+            flex flex-col items-center justify-center
+            p-6 rounded-xl cursor-pointer
+
+            bg-slate-50 dark:bg-slate-800
+            border border-dashed border-slate-300 dark:border-slate-600
+
+            text-slate-600 dark:text-slate-300
+            hover:bg-slate-100 dark:hover:bg-slate-700
+
+            transition
+          "
+        >
+          📷 Upload Student Photo
+          <input
+            type="file"
+            {...register("studentPhoto")}
+            className="hidden"
+          />
+        </label>
+
+        <label
+          className="
+            flex flex-col items-center justify-center
+            p-6 rounded-xl cursor-pointer
+
+            bg-slate-50 dark:bg-slate-800
+            border border-dashed border-slate-300 dark:border-slate-600
+
+            text-slate-600 dark:text-slate-300
+            hover:bg-slate-100 dark:hover:bg-slate-700
+
+            transition
+          "
+        >
+          📄 Upload Supporting Document
+          <input
+            type="file"
+            {...register("studentDocument")}
+            className="hidden"
+          />
+        </label>
+      </div>
     </div>
   );
 }

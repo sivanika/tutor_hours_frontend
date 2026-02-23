@@ -14,16 +14,12 @@ export default function Home() {
     <div
       className="
         min-h-screen
-
-        bg-slate-50
-        text-slate-800
-
-        dark:bg-black
-        dark:text-slate-200
-
-        selection:bg-slate-800
+        bg-white
+        text-[#1a0e33]
+        dark:bg-[#0f0720]
+        dark:text-[#f3f0ff]
+        selection:bg-[#6A11CB]
         selection:text-white
-
         transition-colors duration-500
       "
     >

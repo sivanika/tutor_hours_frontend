@@ -1,72 +1,65 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import API from "../../services/api";
+import { useAuth } from "../../context/AuthContext";
 
 function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-const submit = async (e) => {
-  e.preventDefault();
+  const submit = async (e) => {
+    e.preventDefault();
+    setError("");
 
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const { data } = await API.post("/auth/login", { email, password });
+      const user = await login(email, password);
 
-    const { token, user } = data;
-
-    // Always store fresh user data
-    localStorage.setItem(
-      "userInfo",
-      JSON.stringify({
-        token,
-        user,
-      })
-    );
-
-    // ===== FINAL REDIRECT LOGIC =====
-    if (user.role === "admin") {
-      return navigate("/admin/dashboard");
-    }
-
-    if (user.role === "professor") {
-      if (!user.profileCompleted) {
-        return navigate("/professor/onboarding");
+      // Block admin from regular login — must use /admin/login
+      if (user.role === "admin") {
+        localStorage.removeItem("userInfo");
+        localStorage.removeItem("token");
+        setError("Admin accounts must use the admin portal to login.");
+        return;
       }
-      if (!user.isVerified) {
-        return navigate("/verification-pending");
-      }
-      return navigate("/professor/dashboard");
-    }
 
-    if (user.role === "student") {
-      if (!user.profileCompleted) {
-        return navigate("/student/onboarding");
+      // ===== FINAL REDIRECT LOGIC =====
+      if (user.role === "professor") {
+        if (!user.profileCompleted) {
+          return navigate("/professor/onboarding");
+        }
+        if (!user.isVerified) {
+          return navigate("/verification-pending");
+        }
+        return navigate("/professor/dashboard");
       }
-      return navigate("/student/dashboard");
-    }
 
-  } catch (err) {
-    alert(err.response?.data?.message || "Login failed");
-  } finally {
-    setLoading(false);
-  }
-};
+      if (user.role === "student") {
+        if (!user.profileCompleted) {
+          return navigate("/student/onboarding");
+        }
+        return navigate("/student/dashboard");
+      }
+
+    } catch (err) {
+      setError(err.response?.data?.message || "Login failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
 
   return (
     <div
       className="
         min-h-screen flex items-center justify-center p-6
-
-        bg-slate-100
-        dark:bg-gradient-to-br dark:from-slate-900 dark:via-slate-950 dark:to-black
-
+        bg-gradient-to-br from-[#6A11CB] via-[#4B34C9] to-[#2575FC]
         transition-colors duration-500
       "
     >
@@ -76,11 +69,11 @@ const submit = async (e) => {
         className="
           w-full max-w-md p-8 rounded-2xl
 
-          bg-white/90 dark:bg-slate-900/80
+          bg-white/95
           backdrop-blur-2xl
 
-          border border-slate-200 dark:border-slate-800
-          shadow-xl dark:shadow-black/40
+          border border-white/50
+          shadow-2xl shadow-black/20
 
           animate-[fadeIn_.5s_ease]
 
@@ -88,9 +81,17 @@ const submit = async (e) => {
         "
       >
         {/* Title */}
-        <h2 className="text-3xl font-bold text-center text-slate-800 dark:text-slate-100">
+        <h2 className="text-3xl font-bold text-center text-gray-800">
           Welcome Back
         </h2>
+        <p className="text-center text-sm text-gray-500 -mt-3">Log in to TutorHours</p>
+
+        {/* Error message */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm text-red-600 text-center animate-[fadeIn_.3s_ease]">
+            {error}
+          </div>
+        )}
 
         {/* Email */}
         <input
@@ -98,10 +99,10 @@ const submit = async (e) => {
           placeholder="Email address"
           className="
             w-full p-3 rounded-lg
-            bg-slate-50 dark:bg-slate-800
-            border border-slate-300 dark:border-slate-700
-            text-slate-800 dark:text-slate-100
-            focus:outline-none focus:ring-2 focus:ring-slate-500
+            bg-gray-50
+            border border-gray-200
+            text-gray-800
+            focus:outline-none focus:ring-2 focus:ring-[#6A11CB]/40
             transition
           "
           value={email}
@@ -116,10 +117,10 @@ const submit = async (e) => {
             placeholder="Password"
             className="
               w-full p-3 rounded-lg pr-12
-              bg-slate-50 dark:bg-slate-800
-              border border-slate-300 dark:border-slate-700
-              text-slate-800 dark:text-slate-100
-              focus:outline-none focus:ring-2 focus:ring-slate-500
+              bg-gray-50
+              border border-gray-200
+              text-gray-800
+              focus:outline-none focus:ring-2 focus:ring-[#6A11CB]/40
               transition
             "
             value={password}
@@ -132,8 +133,7 @@ const submit = async (e) => {
             onClick={() => setShowPassword(!showPassword)}
             className="
               absolute right-3 top-3
-              text-slate-500 hover:text-slate-800
-              dark:hover:text-white
+              text-gray-400 hover:text-gray-700
             "
           >
             {showPassword ? "🙈" : "👁️"}
@@ -144,7 +144,7 @@ const submit = async (e) => {
         <div className="text-right">
           <Link
             to="/forgot-password"
-            className="text-sm text-slate-600 dark:text-slate-400 hover:underline"
+            className="text-sm text-[#6A11CB] hover:underline"
           >
             Forgot password?
           </Link>
@@ -155,13 +155,9 @@ const submit = async (e) => {
           disabled={loading}
           className="
             w-full py-3 rounded-lg font-semibold
-
-            bg-slate-900 text-white
-            hover:bg-black
-
-            dark:bg-slate-100 dark:text-black
-            dark:hover:bg-white
-
+            bg-gradient-to-r from-[#6A11CB] to-[#2575FC]
+            text-white
+            hover:shadow-lg hover:shadow-[#6A11CB]/30
             transition-all duration-200
             active:scale-95
             disabled:opacity-60
@@ -171,32 +167,16 @@ const submit = async (e) => {
         </button>
 
         {/* Register */}
-        <p className="text-sm text-center text-slate-600 dark:text-slate-400">
-          Don’t have an account?{" "}
-          <Link to="/register" className="font-medium hover:underline">
+        <p className="text-sm text-center text-gray-500">
+          Don't have an account?{" "}
+          <Link to="/register" className="font-medium text-[#6A11CB] hover:underline">
             Register
           </Link>
         </p>
-        <Link to="/" className="block text-sm text-center text-slate-600 dark:text-slate-400 hover:underline">
+        <Link to="/" className="block text-sm text-center text-gray-500 hover:text-[#6A11CB] hover:underline">
           Back to Home
         </Link>
       </form>
-
-      {/* animation style */}
-      <style>
-        {`
-          @keyframes fadeIn {
-            from {
-              opacity: 0;
-              transform: translateY(25px) scale(0.97);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0) scale(1);
-            }
-          }
-        `}
-      </style>
     </div>
   );
 }

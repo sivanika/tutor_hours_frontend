@@ -1,105 +1,175 @@
 import { useEffect, useState } from "react";
 import API from "../../services/api";
 import socket from "../../services/socket";
+import { FiSearch, FiMail, FiUser, FiBookOpen, FiCheckCircle, FiClock } from "react-icons/fi";
 
 export default function Students() {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
 
   const fetchStudents = async () => {
-    const res = await API.get("/sessions/professor");
-
-    // Collect all students from all sessions
-    const all = res.data.flatMap((session) =>
-      session.students.map((st) => ({
-        ...st,
-        sessionTitle: session.title,
-        level: session.level,
-        sessionId: session._id,
-      }))
-    );
-
-    // Remove duplicates by student ID
-    const unique = [];
-    const seen = new Set();
-    for (let st of all) {
-      if (!seen.has(st._id)) {
-        seen.add(st._id);
-        unique.push(st);
+    try {
+      const res = await API.get("/sessions/professor");
+      const all = res.data.flatMap(session =>
+        session.students.map(entry => ({
+          _id: entry.student?._id || entry.student,
+          name: entry.student?.name || "—",
+          email: entry.student?.email || "—",
+          status: entry.status || "enrolled",
+          enrolledAt: entry.enrolledAt,
+          completedAt: entry.completedAt,
+          sessionTitle: session.title,
+          level: session.level,
+          sessionId: session._id,
+        }))
+      );
+      const seen = new Set();
+      const unique = [];
+      for (let st of all) {
+        if (st._id && !seen.has(st._id)) {
+          seen.add(st._id);
+          unique.push(st);
+        }
       }
+      setStudents(unique);
+    } catch (err) {
+      console.error("Fetch students error:", err.message);
     }
-
-    setStudents(unique);
   };
 
   useEffect(() => {
     fetchStudents().finally(() => setLoading(false));
-
     socket.on("dashboard:update", fetchStudents);
     return () => socket.off("dashboard:update");
   }, []);
 
-  if (loading) return <p className="text-gray-500">Loading students...</p>;
+  const filtered = students.filter(
+    s =>
+      s.name?.toLowerCase().includes(search.toLowerCase()) ||
+      s.email?.toLowerCase().includes(search.toLowerCase())
+  );
 
-  if (!students.length)
-    return <p className="text-gray-500">No students enrolled yet.</p>;
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case "completed":
+        return (
+          <span className="text-xs font-medium text-green-600 bg-green-50 px-3 py-1 rounded-full flex items-center gap-1">
+            <FiCheckCircle size={11} /> Completed
+          </span>
+        );
+      case "attended":
+        return (
+          <span className="text-xs font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full flex items-center gap-1">
+            <FiCheckCircle size={11} /> Attended
+          </span>
+        );
+      default:
+        return (
+          <span className="text-xs font-medium text-amber-600 bg-amber-50 px-3 py-1 rounded-full flex items-center gap-1">
+            <FiClock size={11} /> Enrolled
+          </span>
+        );
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin w-10 h-10 rounded-full border-4 border-[#6A11CB] border-t-transparent" />
+      </div>
+    );
+  }
 
   return (
-    <div>
-      <h2 className="text-2xl font-bold text-[#2A4D6E] mb-6">My Students</h2>
+    <div className="space-y-5 max-w-5xl">
+      {/* Header row */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <h2 className="text-xl font-bold text-gray-800">My Students</h2>
+          <p className="text-sm text-gray-400">{students.length} enrolled across all sessions</p>
+        </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {students.map((s) => (
-          <div
-            key={s._id}
-            className="bg-white rounded-xl p-5 shadow hover:shadow-xl transition border-l-4 border-[#4A8B6F]"
-          >
-            {/* Header */}
-            <div className="flex items-center mb-4">
-              <div className="w-14 h-14 rounded-full bg-[#2A4D6E] flex items-center justify-center text-white text-xl mr-4">
-                👤
-              </div>
-              <div>
-                <h4 className="font-semibold text-[#2A4D6E]">{s.name}</h4>
-                <p className="text-gray-500 text-sm">{s.email}</p>
-              </div>
-            </div>
-
-            {/* Details */}
-            <div className="space-y-2 text-sm mb-4">
-              <div className="flex items-center">
-                <span className="text-[#C76B4A] mr-2">📘</span>
-                <span>{s.sessionTitle}</span>
-              </div>
-              <div className="flex items-center">
-                <span className="text-[#C76B4A] mr-2">🎯</span>
-                <span>Level: {s.level}</span>
-              </div>
-            </div>
-
-            {/* Engagement Box */}
-            <div className="bg-[#F8F5F2] rounded-lg p-3">
-              <div className="flex justify-between items-center mb-2">
-                <h4 className="text-sm font-semibold text-[#2A4D6E]">
-                  Engagement Level
-                </h4>
-                <span className="text-xs px-3 py-1 rounded-full bg-green-100 text-green-700 font-semibold">
-                  High
-                </span>
-              </div>
-
-              <p className="text-xs text-gray-500 mb-2">
-                Actively attending sessions and enrolled successfully.
-              </p>
-
-              <div className="flex justify-between text-xs text-gray-500">
-                <span>Progress: 80%</span>
-                <span>Avg Score: 90%</span>
-              </div>
-            </div>
-          </div>
-        ))}
+        {/* Search */}
+        <div className="relative w-full sm:w-72">
+          <FiSearch size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search by name or email…"
+            className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-white shadow-sm"
+          />
+        </div>
       </div>
+
+      {/* Empty state */}
+      {students.length === 0 && (
+        <div className="text-center py-20 bg-white rounded-2xl border border-gray-100">
+          <div className="text-5xl mb-3">👥</div>
+          <h3 className="text-gray-600 font-semibold">No students yet</h3>
+          <p className="text-sm text-gray-400 mt-1">Students will appear here after they enroll in your sessions.</p>
+        </div>
+      )}
+
+      {/* Student grid */}
+      {filtered.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {filtered.map((s, idx) => (
+            <div
+              key={`${s._id}-${s.sessionId}`}
+              className="bg-white rounded-2xl p-5 shadow-sm hover:shadow-md border border-gray-100 transition-all duration-200 hover:-translate-y-0.5"
+            >
+              {/* Avatar + name */}
+              <div className="flex items-center gap-3 mb-4">
+                <div
+                  className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-sm shrink-0"
+                  style={{ background: `hsl(${(idx * 53) % 360}, 65%, 55%)` }}
+                >
+                  {s.name?.[0]?.toUpperCase() || <FiUser />}
+                </div>
+                <div className="min-w-0">
+                  <h4 className="font-semibold text-gray-800 truncate">{s.name || "—"}</h4>
+                  <p className="text-xs text-gray-400 flex items-center gap-1 truncate">
+                    <FiMail size={11} /> {s.email}
+                  </p>
+                </div>
+              </div>
+
+              {/* Session info */}
+              <div className="bg-gray-50 rounded-xl p-3 space-y-1.5">
+                <div className="flex items-center gap-2 text-xs text-gray-600">
+                  <FiBookOpen size={12} className="text-indigo-400 shrink-0" />
+                  <span className="truncate">{s.sessionTitle}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-gray-400">Level</span>
+                  <span className="text-xs font-semibold text-[#6A11CB] bg-purple-50 px-2 py-0.5 rounded-full">
+                    {s.level}
+                  </span>
+                </div>
+              </div>
+
+              {/* Status badge */}
+              <div className="mt-4 flex items-center justify-between">
+                {getStatusBadge(s.status)}
+                <div className="flex gap-1 text-gray-300">
+                  {[1, 2, 3, 4, 5].map(i => (
+                    <div key={i} className="w-1.5 h-1.5 rounded-full bg-indigo-400 opacity-60" />
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* No results */}
+      {search && filtered.length === 0 && students.length > 0 && (
+        <div className="text-center py-10 text-gray-400">
+          <FiSearch size={32} className="mx-auto mb-2 opacity-40" />
+          <p>No students match "<strong>{search}</strong>"</p>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,4 +1,8 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import API from "../../services/api";
+import toast from "react-hot-toast";
+
 import StepPersonal from "./components/StepPersonal";
 import StepAcademic from "./components/StepAcademic";
 import StepExperience from "./components/StepExperience";
@@ -7,6 +11,7 @@ import ProfilePreview from "./components/ProfilePreview";
 
 export default function ProfessorOnboarding() {
   const [step, setStep] = useState(1);
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -47,6 +52,74 @@ export default function ProfessorOnboarding() {
 
   const steps = ["Personal", "Academic", "Experience", "Verification", "Preview"];
 
+  // 🔥 SUBMIT FUNCTION
+  const submitProfile = async () => {
+    const loadingToast = toast.loading("Submitting profile...");
+
+    try {
+      const form = new FormData();
+
+      // BASIC
+      form.append("firstName", formData.firstName);
+      form.append("lastName", formData.lastName);
+      form.append("email", formData.email);
+      form.append("phone", formData.phone);
+      form.append("country", formData.country);
+      form.append("timezone", formData.timezone);
+      form.append("bio", formData.bio);
+
+      // ACADEMIC
+      form.append("highestDegree", formData.highestDegree);
+      form.append("fieldOfStudy", formData.fieldOfStudy);
+      form.append("university", formData.university);
+      form.append("graduationYear", formData.graduationYear);
+      form.append("specializations", formData.specializations);
+      form.append("certifications", formData.certifications);
+
+      // EXPERIENCE
+      form.append("yearsExperience", formData.yearsExperience);
+      form.append("teachingLevel", formData.teachingLevel);
+      form.append("subjects", formData.subjects);
+      form.append("teachingPhilosophy", formData.teachingPhilosophy);
+      form.append("hourlyRate", formData.hourlyRate);
+
+      // AVAILABILITY
+      form.append("availability", JSON.stringify(formData.availability));
+
+      // FILES
+      if (formData.profilePhoto)
+        form.append("profilePhoto", formData.profilePhoto);
+
+      if (formData.degreeCertificate)
+        form.append("degreeCertificate", formData.degreeCertificate);
+
+      if (formData.governmentId)
+        form.append("governmentId", formData.governmentId);
+
+      if (formData.videoIntroduction)
+        form.append("videoIntroduction", formData.videoIntroduction);
+
+      await API.post("/professors", form);
+
+      // 🔥 UPDATE LOCAL STATE so redirect works on refresh
+      const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+      if (userInfo) {
+        userInfo.user.profileCompleted = true;
+        localStorage.setItem("userInfo", JSON.stringify(userInfo));
+      }
+
+      toast.success("Profile submitted successfully", {
+        id: loadingToast,
+      });
+
+      navigate("/verification-pending");
+    } catch (err) {
+      toast.error(
+        err.response?.data?.message || "Profile submit failed",
+        { id: loadingToast }
+      );
+    }
+  };
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-white to-purple-100 flex flex-col items-center justify-center px-4 py-10">
 
@@ -63,14 +136,12 @@ export default function ProfessorOnboarding() {
         {steps.map((label, index) => (
           <div key={index} className="flex-1 text-center">
             <div
-              className={`h-2 rounded-full transition-all duration-500 ${
-                step > index ? "bg-indigo-600" : "bg-gray-300"
-              }`}
+              className={`h-2 rounded-full transition-all duration-500 ${step > index ? "bg-indigo-600" : "bg-gray-300"
+                }`}
             />
             <p
-              className={`mt-2 text-sm font-semibold ${
-                step === index + 1 ? "text-indigo-600" : "text-gray-500"
-              }`}
+              className={`mt-2 text-sm font-semibold ${step === index + 1 ? "text-indigo-600" : "text-gray-500"
+                }`}
             >
               {label}
             </p>
@@ -82,7 +153,11 @@ export default function ProfessorOnboarding() {
       <div className="w-full max-w-5xl bg-white/70 backdrop-blur-2xl p-8 md:p-12 rounded-3xl shadow-2xl">
 
         {step === 1 && (
-          <StepPersonal formData={formData} setFormData={setFormData} next={() => setStep(2)} />
+          <StepPersonal
+            formData={formData}
+            setFormData={setFormData}
+            next={() => setStep(2)}
+          />
         )}
 
         {step === 2 && (
@@ -116,8 +191,10 @@ export default function ProfessorOnboarding() {
           <ProfilePreview
             formData={formData}
             restart={() => setStep(1)}
+            submit={submitProfile}
           />
         )}
+
       </div>
     </div>
   );

@@ -1,10 +1,15 @@
+import { useNavigate } from "react-router-dom";
+
 export default function Pricing() {
+  const navigate = useNavigate();
+
   const plans = [
     {
       name: "Free Trial",
       price: "₹0",
       period: "/7 days",
       highlight: false,
+      color: "#6A11CB",
       features: [
         "Access to limited tutors",
         "2 demo sessions",
@@ -13,10 +18,11 @@ export default function Pricing() {
       ],
     },
     {
-      name: "Premium Subscription",
+      name: "Premium",
       price: "₹999",
       period: "/month",
       highlight: true,
+      color: "#FF4E9B",
       features: [
         "Unlimited sessions",
         "All verified professors",
@@ -30,6 +36,7 @@ export default function Pricing() {
       price: "18%",
       period: " commission",
       highlight: false,
+      color: "#2575FC",
       features: [
         "No monthly fee",
         "Book anytime",
@@ -43,118 +50,101 @@ export default function Pricing() {
   return (
     <section
       id="pricing"
-      className="
-        py-24
-        bg-slate-50
-        dark:bg-gradient-to-b dark:from-slate-900 dark:to-black
-        transition-colors duration-500
-      "
+      className="relative py-28 bg-white dark:bg-[#0f0720] overflow-hidden transition-colors duration-500"
     >
-      {/* Heading */}
-      <div className="text-center mb-16 px-6">
-        <h2 className="text-4xl font-extrabold mb-4 text-slate-800 dark:text-slate-100">
-          Simple & Transparent Pricing
-        </h2>
+      {/* Blobs */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-[#6A11CB]/05 blur-3xl pointer-events-none" />
 
-        <p className="text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
-          Choose the perfect plan that matches your learning style and budget.
-        </p>
-      </div>
+      <div className="relative z-10">
+        {/* Heading */}
+        <div className="text-center mb-16 px-6">
+          <p className="text-sm font-semibold uppercase tracking-widest text-[#FF4E9B] mb-3">Pricing</p>
+          <h2 className="text-4xl md:text-5xl font-black text-[#1a0e33] dark:text-white mb-4">
+            Simple &amp;{" "}
+            <span className="grad-text">Transparent</span>
+          </h2>
+          <p className="text-[#6b7280] dark:text-[#a78bfa] max-w-xl mx-auto">
+            Choose the perfect plan that matches your learning style and budget.
+          </p>
+        </div>
 
-      {/* Pricing cards */}
-      <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-3 gap-10">
-        {plans.map((plan, i) => (
-          <div
-            key={i}
-            className={`
-              relative p-8 rounded-2xl
-              backdrop-blur-xl
-              border
-              transition-all duration-300
-              hover:-translate-y-1 hover:shadow-xl
-
-              ${
-                plan.highlight
-                  ? `
-                    bg-white dark:bg-slate-900
-                    border-slate-300 dark:border-slate-700
-                    shadow-xl scale-105
-                  `
-                  : `
-                    bg-white/80 dark:bg-slate-900/80
-                    border-slate-200 dark:border-slate-800
-                    shadow-md
-                  `
-              }
-            `}
-          >
-            {/* Popular badge */}
-            {plan.highlight && (
-              <span
-                className="
-                  absolute -top-4 left-1/2 -translate-x-1/2
-                  bg-slate-900 text-white
-                  dark:bg-white dark:text-black
-                  text-xs font-semibold
-                  px-4 py-1 rounded-full
-                "
-              >
-                MOST POPULAR
-              </span>
-            )}
-
-            {/* Plan name */}
-            <h3 className="text-xl font-semibold mb-4 text-center text-slate-800 dark:text-slate-100">
-              {plan.name}
-            </h3>
-
-            {/* Price */}
-            <div className="text-center mb-6">
-              <span className="text-4xl font-bold text-slate-900 dark:text-white">
-                {plan.price}
-              </span>
-              <span className="text-sm text-slate-500 dark:text-slate-400">
-                {plan.period}
-              </span>
-            </div>
-
-            {/* Features */}
-            <ul className="space-y-3 mb-8">
-              {plan.features.map((f, index) => (
-                <li
-                  key={index}
-                  className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400"
-                >
-                  <span className="text-slate-400">✔</span> {f}
-                </li>
-              ))}
-            </ul>
-
-            {/* Button */}
-            <button
+        {/* Cards */}
+        <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-3 gap-8 items-stretch">
+          {plans.map((plan, i) => (
+            <div
+              key={i}
               className={`
-                w-full py-3 rounded-lg font-semibold
-                transition
-
-                ${
-                  plan.highlight
-                    ? `
-                      bg-slate-900 text-white
-                      dark:bg-white dark:text-black
-                      hover:opacity-90
-                    `
-                    : `
-                      bg-slate-200 text-slate-900
-                      dark:bg-slate-800 dark:text-white
-                      hover:bg-slate-300 dark:hover:bg-slate-700
-                    `
+                relative flex flex-col p-8 rounded-3xl overflow-hidden
+                border transition-all duration-300
+                hover:-translate-y-2
+                ${plan.highlight
+                  ? "bg-[#f5f3ff] dark:bg-[#160d2e] border-[#6A11CB]/30 dark:border-[#6A11CB]/40 shadow-2xl shadow-[#6A11CB]/20 scale-105"
+                  : "bg-white dark:bg-[#160d2e] border-[#6A11CB]/10 dark:border-[#6A11CB]/20 shadow-md hover:shadow-xl hover:shadow-[#6A11CB]/10"
                 }
               `}
             >
-              Get Started
-            </button>
-          </div>
-        ))}
+              {/* Top gradient strip */}
+              <div
+                className="absolute top-0 left-0 w-full h-1.5 rounded-t-3xl"
+                style={{ background: `linear-gradient(135deg, ${plan.color}, #2575FC)` }}
+              />
+
+              {/* Popular badge */}
+              {plan.highlight && (
+                <div
+                  className="absolute -top-4 left-1/2 -translate-x-1/2 px-5 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest text-white shadow-lg"
+                  style={{ background: "linear-gradient(135deg, #FF4E9B, #6A11CB)" }}
+                >
+                  Most Popular
+                </div>
+              )}
+
+              {/* Plan name */}
+              <p className="text-sm font-semibold uppercase tracking-widest mb-2" style={{ color: plan.color }}>
+                {plan.name}
+              </p>
+
+              {/* Price */}
+              <div className="mb-6">
+                <span className="text-5xl font-black text-[#1a0e33] dark:text-white">{plan.price}</span>
+                <span className="text-sm text-[#6b7280] dark:text-[#a78bfa] ml-1">{plan.period}</span>
+              </div>
+
+              {/* Features */}
+              <ul className="space-y-3 flex-1 mb-8">
+                {plan.features.map((f, idx) => (
+                  <li key={idx} className="flex items-start gap-2.5 text-sm text-[#1a0e33] dark:text-[#d4caff]">
+                    <span
+                      className="mt-0.5 w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 text-[10px] text-white font-bold"
+                      style={{ background: plan.color }}
+                    >
+                      ✓
+                    </span>
+                    {f}
+                  </li>
+                ))}
+              </ul>
+
+              {/* CTA Button */}
+              <button
+                onClick={() => navigate("/register")}
+                className={`
+                  w-full py-3.5 rounded-2xl font-bold text-sm transition-all duration-300
+                  hover:scale-105 hover:shadow-lg
+                  ${plan.highlight ? "text-white shadow-lg" : "text-white"}
+                `}
+                style={{
+                  background: plan.highlight
+                    ? "linear-gradient(135deg, #FF4E9B, #6A11CB)"
+                    : `linear-gradient(135deg, ${plan.color}, #2575FC)`,
+                  boxShadow: plan.highlight ? "0 8px 24px rgba(255,78,155,0.35)" : `0 4px 16px ${plan.color}30`,
+                }}
+              >
+                Get Started →
+              </button>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
