@@ -112,6 +112,8 @@ export default function ProfessorOnboarding() {
         id: loadingToast,
       });
 
+      alert("Thank you for submitting your profile. Your profile is now under review.");
+
       navigate("/verification-pending");
     } catch (err) {
       toast.error(

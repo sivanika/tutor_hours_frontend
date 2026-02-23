@@ -103,9 +103,16 @@ export default function StudentOnboarding() {
 
       setSubmitted(true);
 
-      setTimeout(() => {
-        navigate("/student/dashboard");
-      }, 1200);
+      // Update localStorage so redirect works on refresh
+      const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+      if (userInfo) {
+        userInfo.user.profileCompleted = true;
+        localStorage.setItem("userInfo", JSON.stringify(userInfo));
+      }
+
+      alert("Thank you for submitting your profile. Welcome aboard!");
+
+      navigate("/student/dashboard");
 
     } catch (err) {
       console.error("Student submit error:", err);
@@ -134,7 +141,7 @@ export default function StudentOnboarding() {
             {step === 4 && <Availability />}
             {step === 5 && <AdminUpload />}
             {step === 6 && <Subscription />}
-            
+
 
             <div className="flex justify-between mt-10">
               {step > 1 && (
